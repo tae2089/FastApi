@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+#param Validation 추가하기
+from fastapi import Query
 from enum import Enum
 from pydantic import BaseModel
 from typing import Optional
@@ -37,11 +39,20 @@ async def read_item(skip: int = 0, limit: int = 10):
 async def create_item(item: Item):
     return item
 
+#param validation 사용하기
+@app.put("/items2/{item_id}")
+async def create_item(item_id: int, item: Item, q: Optional[str] = Query(None, min_length=3, max_length=50, regex="^fixedquery$")):
+    result = {"item_id": item_id, **item.dict()}
+    if q:
+        result.update({"q": q})
+    return result
+
 #Order matters
 #경로가 동일한 함수가 두개 이상 존재할 경우 위에 선언된 메소드부터 검색이 됨
 @app.get("/users/me")
 async def read_user_me():
     return {"user_id": "the current user"}
+    
 #Order matters
 @app.get("/users/{user_id}")
 async def read_user(user_id: str):
